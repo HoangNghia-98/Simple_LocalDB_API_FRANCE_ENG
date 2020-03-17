@@ -2,7 +2,6 @@ const express = require('express')
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const adapter = new FileSync('./db/dictionary.json');
