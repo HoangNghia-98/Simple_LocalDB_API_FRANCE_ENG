@@ -1,0 +1,18 @@
+{
+  "name": "Simple_LocalDB_API_FRANCE_ENG",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app"
+  },
+  "keywords": [],
+  "author": "1612426_HoangNghia",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "lowdb": "^1.0.0",
+    "nodemon": "^2.0.2"
+  }
+}
