@@ -20,7 +20,7 @@ app.get('/words', (req, res) => {
   res.json(ret);
 });
 
-//api translate from France to English (data from params of request)
+//api translate from France to English (data from params of request). vd: localhost:4200/translate/bonjour
 app.get('/translate/:franceWord', async (req, res) => {
   try {
     const franceWord = req.params.franceWord;
@@ -38,7 +38,7 @@ app.get('/translate/:franceWord', async (req, res) => {
   }
 });
 
-// api add new word into dictionary (data from body of request)
+// api add new word into dictionary (data from body of request). vd {"fr": "bonjour", "en": "hello"}
 app.post('/add-word', async (req, res) => {
   try {
     const newWord = req.body;
@@ -56,7 +56,7 @@ app.post('/add-word', async (req, res) => {
   }
 });
 
-// api delete a word from dictionary (data from body of request)
+// api delete a word from dictionary (data from body of request). vd {"fr": "franceWord"}
 app.delete('', async (req, res) => {
   try {
     let fr_word = req.body.fr;
@@ -74,8 +74,60 @@ app.delete('', async (req, res) => {
       await db.get('words').remove({ fr: `${fr_word}` }).write();
       res.json({
         success: true,
-        message: `"${fr_word}" is already deleted`
+        message: `*${fr_word}* is already deleted`
       });
+    }
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});
+
+//api update từ vựng trong dictionary. Data lấy từ req body. 
+//VD: {"fr": "Bonjours", "edit_into": "bonjour"} or {"en": "heloo", "edit_into": "hello" }
+app.put('', async (req, res) => {
+  try {
+    let fr_word = req.body.fr;
+    let en_word = req.body.en;
+    let edit_into = req.body.edit_into;
+
+    if (!edit_into || edit_into.length == 0 || (fr_word && en_word) ||
+      ((!fr_word || fr_word.length == 0) && (!en_word || en_word.length == 0))) {
+      return res.status(403).json({
+        success: false,
+        message: 'request body is invalid !!!'
+      });
+    };
+
+    let isExist
+    if (fr_word) {
+      isExist = await db.get('words').find({ fr: `${fr_word}` }).value();
+    } else {
+      isExist = await db.get('words').find({ en: `${en_word}` }).value();
+    }
+
+    if (!isExist) {
+      if (fr_word) {
+        return res.status(404).json({ success: false, message: `*${fr_word}* is not exist in DB!!!` });
+
+      } else {
+        return res.status(404).json({ success: false, message: `"*${en_word}* is not exist in DB!!!` });
+
+      }
+    } else {
+      if (fr_word) {
+        await db.get('words').find({ fr: `${fr_word}` }).assign({ fr: `${edit_into}` }).write();
+        return res.json({
+          success: true,
+          message: `*${fr_word}* is already edited into *${edit_into}* in DB`
+        });
+      } else {
+        await db.get('words').find({ en: `${en_word}` }).assign({ en: `${edit_into}` }).write();
+        return res.json({
+          success: true,
+          message: `*${en_word}* is already edited into *${edit_into}* in DB`
+        });
+      }
+
     }
   } catch (error) {
     res.status(500).json({ error });
